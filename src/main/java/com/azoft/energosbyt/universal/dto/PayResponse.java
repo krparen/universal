@@ -7,6 +7,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class CheckResponse extends BasicResponse {
-  private String address;
+public class PayResponse extends BasicResponse {
+  private String txnId;
 }

@@ -13,7 +13,7 @@ public class CheckRequest {
   private List<Service> services;
 
   @Data
-  static class Service {
+  public static class Service {
     private String code;
     private BigDecimal sum;
   }
