@@ -3,10 +3,15 @@ package com.azoft.energosbyt.universal.controller;
 import com.azoft.energosbyt.universal.dto.BalanceResponse;
 import com.azoft.energosbyt.universal.dto.CheckRequest;
 import com.azoft.energosbyt.universal.dto.CheckResponse;
+import com.azoft.energosbyt.universal.dto.MeterResponse;
+import com.azoft.energosbyt.universal.dto.MeterValueRequest;
+import com.azoft.energosbyt.universal.dto.MeterValueResponse;
 import com.azoft.energosbyt.universal.dto.PayRequest;
 import com.azoft.energosbyt.universal.dto.PayResponse;
 import com.azoft.energosbyt.universal.service.BalanceService;
 import com.azoft.energosbyt.universal.service.CheckService;
+import com.azoft.energosbyt.universal.service.MeterService;
+import com.azoft.energosbyt.universal.service.MeterValueService;
 import com.azoft.energosbyt.universal.service.PayService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +30,14 @@ public class UniversalController {
   public static final String CHECK_URL = "check";
   public static final String BALANCE_URL = "balance";
   public static final String PAY_URL = "pay";
-  public static final String METERS_URL = "meter";
-  public static final String METERS_VALUE_URL = "meter/value";
+  public static final String METER_URL = "meter";
+  public static final String METER_VALUE_URL = "meter/value";
 
   private final CheckService checkService;
   private final BalanceService balanceService;
   private final PayService payService;
+  private final MeterService meterService;
+  private final MeterValueService meterValueService;
 
   @PostMapping(CHECK_URL)
   public CheckResponse check(@RequestBody CheckRequest request) {
@@ -45,5 +52,15 @@ public class UniversalController {
   @PostMapping(PAY_URL)
   public PayResponse pay(@RequestBody PayRequest request) {
     return payService.process(request);
+  }
+
+  @GetMapping(METER_URL)
+  public MeterResponse meter(@RequestParam String system, @RequestParam String account) {
+    return meterService.process(system, account);
+  }
+
+  @PostMapping(METER_VALUE_URL)
+  public MeterValueResponse meterValue(@RequestBody MeterValueRequest meterValueRequest) {
+    return meterValueService.process(meterValueRequest);
   }
 }
