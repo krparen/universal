@@ -2,7 +2,7 @@ package com.azoft.energosbyt.universal.service;
 
 import com.azoft.energosbyt.universal.dto.BaseMeter;
 import com.azoft.energosbyt.universal.dto.BasePerson;
-import com.azoft.energosbyt.universal.dto.ErrorCode;
+import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.azoft.energosbyt.universal.dto.Meter;
 import com.azoft.energosbyt.universal.dto.MeterResponse;
 import com.azoft.energosbyt.universal.exception.ApiException;

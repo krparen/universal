@@ -1,4 +1,4 @@
-package com.azoft.energosbyt.universal.dto;
+package com.azoft.energosbyt.universal.exception;
 
 import lombok.Getter;
 

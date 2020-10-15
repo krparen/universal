@@ -1,6 +1,5 @@
 package com.azoft.energosbyt.universal.exception;
 
-import com.azoft.energosbyt.universal.dto.ErrorCode;
 import lombok.Getter;
 import lombok.Setter;
 

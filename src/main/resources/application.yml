@@ -1,0 +1,15 @@
+energosbyt:
+  application:
+    this-system-id: 1010
+    qiwi-system-id: QIWI
+  rabbit:
+    host: 10.5.3.70
+    port: 5672
+    username: admin
+    password: Etooshagh5
+    request:
+      check:
+        queue-name: ccb
+      pay:
+        queue-name: pay
+      timeout-in-ms: 30000

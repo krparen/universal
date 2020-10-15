@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class BasicResponse {
-  private OperationStatus status;
+  private OperationStatus status = OperationStatus.ok;
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private Integer errorCode;
   @JsonInclude(JsonInclude.Include.NON_NULL)
