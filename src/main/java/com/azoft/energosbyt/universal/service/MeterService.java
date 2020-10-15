@@ -55,12 +55,12 @@ public class MeterService {
             String personId = personRabbitResponse.getSrch_res().getRes().get(0).getId();
 
             metersReplyQueueName = declareReplyQueueWithUuidName();
-            BaseMeter metersRabbitResponse = searchMetersByPersonId(metersReplyQueueName, personId);
+            BaseMeter metersRabbitResponse = ccbService.searchMetersByPersonId(personId);
             log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
 
             Map<String, String> activeMetersIdAndServiceType = getActiveMetersIdAndServiceType(metersRabbitResponse);
 
-            List<BaseMeter> activeMeters = getActiveMeters(openMeterValueReplyQueues, activeMetersIdAndServiceType.keySet());
+            List<BaseMeter> activeMeters = getActiveMeters(activeMetersIdAndServiceType.keySet());
             return getMeterResponse(activeMeters, activeMetersIdAndServiceType);
         } finally {
             if (personReplyQueueName != null) {
@@ -69,23 +69,14 @@ public class MeterService {
             if (metersReplyQueueName != null) {
                 rabbitAdmin.deleteQueue(metersReplyQueueName);
             }
-            openMeterValueReplyQueues.forEach( queueName -> {
-                if (queueName != null) {
-                    rabbitAdmin.deleteQueue(queueName);
-                }
-            });
         }
     }
 
-    private List<BaseMeter> getActiveMeters(Set<String> openMeterValueReplyQueues, Set<String> activeMeterIds) {
+    private List<BaseMeter> getActiveMeters(Set<String> activeMeterIds) {
         List<BaseMeter> activeMeters = new ArrayList<>();
         activeMeterIds.forEach(id -> {
-            String meterValueReplyQueue = declareReplyQueueWithUuidName();
-            openMeterValueReplyQueues.add(meterValueReplyQueue);
-            BaseMeter activeMeter = getMeterById(meterValueReplyQueue, id);
+            BaseMeter activeMeter = ccbService.getMeterById(id);
             activeMeters.add(activeMeter);
-            rabbitAdmin.deleteQueue(meterValueReplyQueue);
-            openMeterValueReplyQueues.remove(meterValueReplyQueue);
         });
         return activeMeters;
     }

@@ -1,13 +1,15 @@
 package com.azoft.energosbyt.universal.service.queue;
 
-import com.azoft.energosbyt.universal.dto.BasePerson;
 import com.azoft.energosbyt.universal.exception.ApiException;
 import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
