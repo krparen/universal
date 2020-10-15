@@ -3,6 +3,7 @@ package com.azoft.energosbyt.universal.service;
 import com.azoft.energosbyt.universal.dto.BaseMeter;
 import com.azoft.energosbyt.universal.dto.BasePerson;
 import com.azoft.energosbyt.universal.dto.ErrorCode;
+import com.azoft.energosbyt.universal.dto.Meter;
 import com.azoft.energosbyt.universal.dto.MeterResponse;
 import com.azoft.energosbyt.universal.exception.ApiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -337,8 +338,29 @@ public class MeterService {
 
     private MeterResponse getMeterResponse(String system, String account, BasePerson rabbitResponse, List<BaseMeter> activeMeters) {
 
+        List<Meter> meters = new ArrayList<>();
+
+        activeMeters.forEach(baseMeter -> {
+            Meter meter = new Meter();
+            meter.setMeterId(baseMeter.getId());
+            meter.setMeterNumber(baseMeter.getBadgeNumber());
+
+            List<BaseMeter.Registr> registrs = baseMeter.getRegisters();
+
+            if (!registrs.isEmpty()) {
+                meter.setDigits(registrs.get(0).getNumberOfDigitsLeft());
+            }
+
+            Map<String, String> meterData = new HashMap<>();
+            meterData.put("T1", baseMeter.getNumber());
+            meter.setMeterData(meterData);
+
+            meters.add(meter);
+        });
+
         MeterResponse response = new MeterResponse();
-        // TODO: Заполнить ответ из activeMeters
+        response.setMeters(meters);
+
         return response;
     }
 

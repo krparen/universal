@@ -9,6 +9,6 @@ public class Meter {
   private String meterId;
   private String meterNumber;
   private String serviceName;
-  private Integer digits;
-  private Map<String, Long> meterData = new HashMap<>();
+  private String digits;
+  private Map<String, String> meterData = new HashMap<>();
 }
