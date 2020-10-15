@@ -55,10 +55,10 @@ public class MeterService {
             BaseMeter metersRabbitResponse = searchMetersByPersonId(metersReplyQueueName, personId);
             log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
 
-            List<BaseMeter> activeMeters = getActiveMeters(openMeterValueReplyQueues, metersRabbitResponse);
+            Map<String, String> activeMetersIdAndServiceType = getActiveMetersIdAndServiceType(metersRabbitResponse);
 
-
-            return getMeterResponse(system, account, personRabbitResponse, activeMeters);
+            List<BaseMeter> activeMeters = getActiveMeters(openMeterValueReplyQueues, activeMetersIdAndServiceType.keySet());
+            return getMeterResponse(activeMeters, activeMetersIdAndServiceType);
         } finally {
             if (personReplyQueueName != null) {
                 rabbitAdmin.deleteQueue(personReplyQueueName);
@@ -74,8 +74,7 @@ public class MeterService {
         }
     }
 
-    private List<BaseMeter> getActiveMeters(Set<String> openMeterValueReplyQueues, BaseMeter metersRabbitResponse) {
-        Set<String> activeMeterIds = getActiveMeterIds(metersRabbitResponse);
+    private List<BaseMeter> getActiveMeters(Set<String> openMeterValueReplyQueues, Set<String> activeMeterIds) {
         List<BaseMeter> activeMeters = new ArrayList<>();
         activeMeterIds.forEach(id -> {
             String meterValueReplyQueue = declareReplyQueueWithUuidName();
@@ -88,8 +87,8 @@ public class MeterService {
         return activeMeters;
     }
 
-    private Set<String> getActiveMeterIds(BaseMeter metersSearchResult) {
-        Set<String> activeMeterIds = new HashSet<>();
+    private Map<String, String> getActiveMetersIdAndServiceType(BaseMeter metersSearchResult) {
+        Map<String, String> activeMetersIdAndServiceType = new HashMap<>();
 
         List<BaseMeter.Srch_res.Srch_res_s> services = metersSearchResult.getSrch_res().getServ();
         for (BaseMeter.Srch_res.Srch_res_s service : services) {
@@ -108,14 +107,14 @@ public class MeterService {
                     List<BaseMeter.Srch_res.Srch_res_s.Service_point.Sp_history> spHistories = servicePoint.getSPHs();
                     for (BaseMeter.Srch_res.Srch_res_s.Service_point.Sp_history spHistory : spHistories) {
                         if (spHistory.getRemove_date() == null) {
-                            activeMeterIds.add(spHistory.getMeter_id());
+                            activeMetersIdAndServiceType.put(spHistory.getMeter_id(), servicePoint.getServiceType());
                         }
                     }
                 }
             }
         }
 
-        return activeMeterIds;
+        return activeMetersIdAndServiceType;
     }
 
     private BaseMeter searchMetersByPersonId(String metersReplyQueueName, String personId) {
@@ -336,7 +335,7 @@ public class MeterService {
         return response;
     }
 
-    private MeterResponse getMeterResponse(String system, String account, BasePerson rabbitResponse, List<BaseMeter> activeMeters) {
+    private MeterResponse getMeterResponse(List<BaseMeter> activeMeters, Map<String, String> activeMetersIdAndServiceType) {
 
         List<Meter> meters = new ArrayList<>();
 
@@ -344,6 +343,7 @@ public class MeterService {
             Meter meter = new Meter();
             meter.setMeterId(baseMeter.getId());
             meter.setMeterNumber(baseMeter.getBadgeNumber());
+            meter.setServiceName(activeMetersIdAndServiceType.get(baseMeter.getId()));
 
             List<BaseMeter.Registr> registrs = baseMeter.getRegisters();
 
