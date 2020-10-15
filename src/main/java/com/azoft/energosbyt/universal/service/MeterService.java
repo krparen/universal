@@ -6,6 +6,7 @@ import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.azoft.energosbyt.universal.dto.Meter;
 import com.azoft.energosbyt.universal.dto.MeterResponse;
 import com.azoft.energosbyt.universal.exception.ApiException;
+import com.azoft.energosbyt.universal.service.queue.CcbService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +34,13 @@ public class MeterService {
     private final AmqpTemplate template;
     private final AmqpAdmin rabbitAdmin;
     private final ObjectMapper mapper;
+    private final CcbService ccbService;
 
-    public MeterService(AmqpTemplate template, AmqpAdmin rabbitAdmin, ObjectMapper mapper) {
+    public MeterService(AmqpTemplate template, AmqpAdmin rabbitAdmin, ObjectMapper mapper, CcbService ccbService) {
         this.template = template;
         this.rabbitAdmin = rabbitAdmin;
         this.mapper = mapper;
+        this.ccbService = ccbService;
     }
 
     public MeterResponse process(String system, String account) {
@@ -48,7 +51,7 @@ public class MeterService {
 
         try {
             personReplyQueueName = declareReplyQueueWithUuidName();
-            BasePerson personRabbitResponse = searchPersonByAccount(account, personReplyQueueName);
+            BasePerson personRabbitResponse = ccbService.searchPersonByAccount(account);
             String personId = personRabbitResponse.getSrch_res().getRes().get(0).getId();
 
             metersReplyQueueName = declareReplyQueueWithUuidName();
