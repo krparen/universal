@@ -10,11 +10,13 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-
 @Service
 @Slf4j
 public class CcbService extends AbstractQueueService {
+
+    private static final String SEARCH_PERSON_TYPE = "searchPerson";
+    private static final String SEARCH_METER_TYPE = "searchMeter";
+    private static final String GET_METER_TYPE = "getMeter";
 
     @Value("${energosbyt.rabbit.request.check.queue-name}")
     private String ccbQueueName;
@@ -25,7 +27,7 @@ public class CcbService extends AbstractQueueService {
 
         try {
             personReplyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties personMessageProperties = createPersonMessageProperties(personReplyQueueName);
+            MessageProperties personMessageProperties = createMessageProperties(personReplyQueueName, SEARCH_PERSON_TYPE);
             BasePerson bodyObject = createPersonRabbitRequest(account);
             byte[] personMessageBody = toJsonToBytes(bodyObject);
             Message personRequestMessage = new Message(personMessageBody, personMessageProperties);
@@ -52,7 +54,7 @@ public class CcbService extends AbstractQueueService {
 
         try {
             metersReplyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties metersMessageProperties = createMetersMessageProperties(metersReplyQueueName);
+            MessageProperties metersMessageProperties = createMessageProperties(metersReplyQueueName, SEARCH_METER_TYPE);
             BaseMeter bodyObject = createMetersRabbitRequest(personId);
             byte[] metersMessageBody = toJsonToBytes(bodyObject);
             Message metersRequestMessage = new Message(metersMessageBody, metersMessageProperties);
@@ -73,7 +75,7 @@ public class CcbService extends AbstractQueueService {
 
         try {
             meterValuesReplyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties metersMessageProperties = createMeterValuesMessageProperties(meterValuesReplyQueueName);
+            MessageProperties metersMessageProperties = createMessageProperties(meterValuesReplyQueueName, GET_METER_TYPE);
             BaseMeter bodyObject = createMeterValuesRabbitRequest(meterId);
             byte[] metersMessageBody = toJsonToBytes(bodyObject);
             Message meterValuesRequestMessage = new Message(metersMessageBody, metersMessageProperties);
@@ -88,29 +90,11 @@ public class CcbService extends AbstractQueueService {
         }
     }
 
-    private MessageProperties createMeterValuesMessageProperties(String meterValuesReplyQueueName) {
-        MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setHeader("type", "getMeter");
-        messageProperties.setHeader("m_guid", "08.06.2020"); // легаси заголовок, должен присутствовать, а что в нём - не важно
-        messageProperties.setHeader("reply-to", meterValuesReplyQueueName);
-        messageProperties.setContentEncoding(StandardCharsets.UTF_8.name());
-        return messageProperties;
-    }
-
     private BaseMeter createMeterValuesRabbitRequest(String meterId) {
         BaseMeter rabbitRequest = new BaseMeter();
         rabbitRequest.setSystem_id(thisSystemId);
         rabbitRequest.setId(meterId);
         return rabbitRequest;
-    }
-
-    private MessageProperties createMetersMessageProperties(String metersReplyQueueName) {
-        MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setHeader("type", "searchMeter");
-        messageProperties.setHeader("m_guid", "08.06.2020"); // легаси заголовок, должен присутствовать, а что в нём - не важно
-        messageProperties.setHeader("reply-to", metersReplyQueueName);
-        messageProperties.setContentEncoding(StandardCharsets.UTF_8.name());
-        return messageProperties;
     }
 
     private BaseMeter createMetersRabbitRequest(String personId) {
@@ -121,15 +105,6 @@ public class CcbService extends AbstractQueueService {
         search.setPerson_Id(personId);
         rabbitRequest.setSrch(search);
         return rabbitRequest;
-    }
-
-    private MessageProperties createPersonMessageProperties(String replyQueueName) {
-        MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setHeader("type", "searchPerson");
-        messageProperties.setHeader("m_guid", "08.06.2020"); // легаси заголовок, должен присутствовать, а что в нём - не важно
-        messageProperties.setHeader("reply-to", replyQueueName);
-        messageProperties.setContentEncoding(StandardCharsets.UTF_8.name());
-        return messageProperties;
     }
 
     private BasePerson createPersonRabbitRequest(String account) {

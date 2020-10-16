@@ -6,10 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.AmqpAdmin;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -90,6 +87,15 @@ public class AbstractQueueService {
 
         log.info("response from rabbit: {}", response);
         return response;
+    }
+
+    protected MessageProperties createMessageProperties(String replyQueueName, String type) {
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setHeader("type", type);
+        messageProperties.setHeader("m_guid", "08.06.2020"); // легаси заголовок, должен присутствовать, а что в нём - не важно
+        messageProperties.setHeader("reply-to", replyQueueName);
+        messageProperties.setContentEncoding(StandardCharsets.UTF_8.name());
+        return messageProperties;
     }
 
     private String getMessageBodyAsString(Message responseMessage) {
