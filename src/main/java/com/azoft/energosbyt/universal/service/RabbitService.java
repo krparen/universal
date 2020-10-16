@@ -47,7 +47,9 @@ public class RabbitService {
             T response = (T) safelyReceiveResponse(replyQueueName, messageBody.getClass());
             return response;
         } finally {
-
+            if (replyQueueName != null) {
+                rabbitAdmin.deleteQueue(replyQueueName);
+            }
         }
     }
 
