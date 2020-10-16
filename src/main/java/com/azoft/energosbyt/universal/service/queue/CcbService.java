@@ -5,9 +5,11 @@ import com.azoft.energosbyt.universal.dto.BasePerson;
 import com.azoft.energosbyt.universal.dto.BasePremise;
 import com.azoft.energosbyt.universal.exception.ApiException;
 import com.azoft.energosbyt.universal.exception.ErrorCode;
+import com.azoft.energosbyt.universal.service.RabbitService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,33 +25,23 @@ public class CcbService extends AbstractQueueService {
 
     @Value("${energosbyt.rabbit.request.check.queue-name}")
     private String ccbQueueName;
+    @Value("${energosbyt.application.this-system-id}")
+    protected String thisSystemId;
+
+    @Autowired
+    private RabbitService rabbitService;
 
     public BasePerson searchAccountsByPersonId(String personId) {
-        String replyQueueName = null;
-
-        try {
-            replyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties properties = createMessageProperties(replyQueueName, TYPE_GET_PERSON_ACCOUNT);
-            BasePerson bodyObject = createSearchAccountByPersonIdRabbitRequest(personId);
-            byte[] messageBody = toJsonToBytes(bodyObject);
-
-            Message personRequestMessage = new Message(messageBody, properties);
-
-            template.send(ccbQueueName, personRequestMessage);
-            BasePerson response = safelyReceiveResponse(replyQueueName, BasePerson.class);
-            log.info("response for searchAccount: {}", response);
-            return response;
-
-        } finally {
-            if (replyQueueName != null) {
-                rabbitAdmin.deleteQueue(replyQueueName);
-            }
-        }
+        MessageProperties properties = createMessageProperties(TYPE_GET_PERSON_ACCOUNT);
+        BasePerson bodyObject = createSearchAccountByPersonIdRabbitRequest(personId);
+        BasePerson response = rabbitService.sendAndReceive(ccbQueueName, properties, bodyObject);
+        log.info("response for searchAccount: {}", response);
+        return response;
     }
 
     public String getAddress(String account) {
         BasePerson person = searchPersonByAccount(account);
-        BasePerson accountsSearchResult = searchAccountsByPersonId(person.getId());
+        BasePerson accountsSearchResult = searchAccountsByPersonId(person.getSrch_res().getRes().get(0).getId());
 
         String premiseId = accountsSearchResult.getAccounts().stream()
                 .filter(acc -> account.equals(acc.getAccount_number()))
@@ -71,25 +63,11 @@ public class CcbService extends AbstractQueueService {
     }
 
     public BasePremise getPremise(String premiseId) {
-
-        String replyQueueName = null;
-        try {
-            replyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties properties = createMessageProperties(replyQueueName, TYPE_GET_PREMISE);
-            BasePremise bodyObject = createGetPremiseRabbitRequest(premiseId);
-            byte[] messageBody = toJsonToBytes(bodyObject);
-
-            Message personRequestMessage = new Message(messageBody, properties);
-
-            template.send(ccbQueueName, personRequestMessage);
-            BasePremise response = safelyReceiveResponse(replyQueueName, BasePremise.class);
-            log.info("response for getPremise: {}", response);
-            return response;
-        } finally {
-            if (replyQueueName != null) {
-                rabbitAdmin.deleteQueue(replyQueueName);
-            }
-        }
+        MessageProperties properties = createMessageProperties(TYPE_GET_PREMISE);
+        BasePremise bodyObject = createGetPremiseRabbitRequest(premiseId);
+        BasePremise response = rabbitService.sendAndReceive(ccbQueueName, properties, bodyObject);
+        log.info("response for getPremise: {}", response);
+        return response;
     }
 
     private BasePremise createGetPremiseRabbitRequest(String premiseId) {
@@ -100,71 +78,29 @@ public class CcbService extends AbstractQueueService {
 
     public BasePerson searchPersonByAccount(String account) {
 
-        String personReplyQueueName = null;
+        MessageProperties messageProperties = createMessageProperties(TYPE_SEARCH_PERSON);
+        BasePerson bodyObject = createSearchPersonByAccountRabbitRequest(account);
+        BasePerson personRabbitResponse = rabbitService.sendAndReceive(ccbQueueName, messageProperties, bodyObject);
 
-        try {
-            personReplyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties personMessageProperties = createMessageProperties(personReplyQueueName, TYPE_SEARCH_PERSON);
-            BasePerson bodyObject = createSearchPersonByAccountRabbitRequest(account);
-            byte[] personMessageBody = toJsonToBytes(bodyObject);
-            Message personRequestMessage = new Message(personMessageBody, personMessageProperties);
-
-            template.send(ccbQueueName, personRequestMessage);
-            BasePerson personRabbitResponse = safelyReceiveResponse(personReplyQueueName, BasePerson.class);
-
-            if (personRabbitResponse.getSrch_res().getRes().isEmpty()) {
-                String message = "No person found for account id = " + account;
-                log.error(message);
-                throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
-            }
-            return personRabbitResponse;
-        } finally {
-            if (personReplyQueueName != null) {
-                rabbitAdmin.deleteQueue(personReplyQueueName);
-            }
+        if (personRabbitResponse.getSrch_res().getRes().isEmpty()) {
+            String message = "No person found for account id = " + account;
+            log.error(message);
+            throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
         }
+
+        return personRabbitResponse;
     }
 
     public BaseMeter searchMetersByPersonId(String personId) {
-
-        String metersReplyQueueName = null;
-
-        try {
-            metersReplyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties metersMessageProperties = createMessageProperties(metersReplyQueueName, TYPE_SEARCH_METER);
-            BaseMeter bodyObject = createMetersRabbitRequest(personId);
-            byte[] metersMessageBody = toJsonToBytes(bodyObject);
-            Message metersRequestMessage = new Message(metersMessageBody, metersMessageProperties);
-
-            template.send(ccbQueueName, metersRequestMessage);
-
-            return safelyReceiveResponse(metersReplyQueueName, BaseMeter.class);
-        } finally {
-            if (metersReplyQueueName != null) {
-                rabbitAdmin.deleteQueue(metersReplyQueueName);
-            }
-        }
+        MessageProperties messageProperties = createMessageProperties(TYPE_SEARCH_METER);
+        BaseMeter bodyObject = createMetersRabbitRequest(personId);
+        return rabbitService.sendAndReceive(ccbQueueName, messageProperties, bodyObject);
     }
 
     public BaseMeter getMeterById(String meterId) {
-
-        String meterValuesReplyQueueName = null;
-
-        try {
-            meterValuesReplyQueueName = declareReplyQueueWithUuidName();
-            MessageProperties metersMessageProperties = createMessageProperties(meterValuesReplyQueueName, TYPE_GET_METER);
-            BaseMeter bodyObject = createMeterValuesRabbitRequest(meterId);
-            byte[] metersMessageBody = toJsonToBytes(bodyObject);
-            Message meterValuesRequestMessage = new Message(metersMessageBody, metersMessageProperties);
-
-            template.send(ccbQueueName, meterValuesRequestMessage);
-
-            return safelyReceiveResponse(meterValuesReplyQueueName, BaseMeter.class);
-        } finally {
-            if (meterValuesReplyQueueName != null) {
-                rabbitAdmin.deleteQueue(meterValuesReplyQueueName);
-            }
-        }
+        MessageProperties metersMessageProperties = createMessageProperties(TYPE_GET_METER);
+        BaseMeter bodyObject = createMeterValuesRabbitRequest(meterId);
+        return rabbitService.sendAndReceive(ccbQueueName, metersMessageProperties, bodyObject);
     }
 
     private BaseMeter createMeterValuesRabbitRequest(String meterId) {
