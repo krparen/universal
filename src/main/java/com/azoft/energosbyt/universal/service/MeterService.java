@@ -2,22 +2,12 @@ package com.azoft.energosbyt.universal.service;
 
 import com.azoft.energosbyt.universal.dto.BaseMeter;
 import com.azoft.energosbyt.universal.dto.BasePerson;
-import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.azoft.energosbyt.universal.dto.Meter;
 import com.azoft.energosbyt.universal.dto.MeterResponse;
-import com.azoft.energosbyt.universal.exception.ApiException;
 import com.azoft.energosbyt.universal.service.queue.CcbService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -33,6 +23,8 @@ public class MeterService {
     public MeterResponse process(String system, String account) {
         BasePerson personRabbitResponse = ccbService.searchPersonByAccount(account);
         String personId = personRabbitResponse.getSrch_res().getRes().get(0).getId();
+
+        log.info("address : {}", ccbService.getAddress(account));
 
         BaseMeter metersRabbitResponse = ccbService.searchMetersByPersonId(personId);
         log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
