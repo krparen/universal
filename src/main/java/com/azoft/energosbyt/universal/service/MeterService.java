@@ -24,8 +24,6 @@ public class MeterService {
         BasePerson personRabbitResponse = ccbService.searchPersonByAccount(account);
         String personId = personRabbitResponse.getSrch_res().getRes().get(0).getId();
 
-        log.info("address : {}", ccbService.getAddress(account));
-
         BaseMeter metersRabbitResponse = ccbService.searchMetersByPersonId(personId);
         log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
 

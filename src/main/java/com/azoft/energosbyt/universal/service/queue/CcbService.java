@@ -38,9 +38,8 @@ public class CcbService extends AbstractQueueService {
         return response;
     }
 
-    public String getAddress(String account) {
-        BasePerson person = searchPersonByAccount(account);
-        BasePerson accountsSearchResult = searchAccountsByPersonId(person.getSrch_res().getRes().get(0).getId());
+    public String getAddress(String personId, String account) {
+        BasePerson accountsSearchResult = searchAccountsByPersonId(personId);
 
         String premiseId = accountsSearchResult.getAccounts().stream()
                 .filter(acc -> account.equals(acc.getAccount_number()))
@@ -83,6 +82,12 @@ public class CcbService extends AbstractQueueService {
 
         if (personRabbitResponse.getSrch_res().getRes().isEmpty()) {
             String message = "No person found for account id = " + account;
+            log.error(message);
+            throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
+        }
+
+        if (personRabbitResponse.getSrch_res().getRes().size() > 1) {
+            String message = "More than one person found for account id = " + account;
             log.error(message);
             throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
         }
