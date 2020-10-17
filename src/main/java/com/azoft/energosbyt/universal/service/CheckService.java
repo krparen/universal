@@ -15,21 +15,14 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class CheckService {
 
-  private static final String TXN_RECORD_WITH_SAME_ID_EXISTS =
-          "Transaction with id = %s and system = %s is in progress or finished";
-
   @Autowired
   private CcbService ccbService;
   @Autowired
-  private UniversalTxnRepository txnRepository;
+  private UniversalTxnService txnService;
 
   public CheckResponse process(CheckRequest request) {
 
-    if (txnRepository.findByTxnIdAndSystem(request.getTxnId(), request.getSystem()) != null) {
-      String message = String.format(TXN_RECORD_WITH_SAME_ID_EXISTS, request.getTxnId(), request.getSystem());
-      log.error(message);
-      throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
-    }
+    txnService.assertSameTxnNotExist(request.getTxnId(), request.getSystem());
 
     BasePerson personSearch = ccbService.searchPersonByAccount(request.getAccount());
     String personId = personSearch.getSrch_res().getRes().get(0).getId();
