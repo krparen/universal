@@ -31,6 +31,10 @@ public class RabbitService {
     @Autowired
     protected ObjectMapper mapper;
 
+    public void send(String queueName, MessageProperties messageProperties, Object messageBody) {
+        Message personRequestMessage = new Message(toJsonToBytes(messageBody), messageProperties);
+        template.send(queueName, personRequestMessage);
+    }
 
     public <T> T sendAndReceive(String queueName, MessageProperties messageProperties, T messageBody) {
         String replyQueueName = messageProperties.getHeader(HEADER_REPLY_TO);

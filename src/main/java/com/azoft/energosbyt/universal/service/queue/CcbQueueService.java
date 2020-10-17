@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+
 @Service
 @Slf4j
-public class CcbService extends AbstractQueueService {
+public class CcbQueueService {
 
     private static final String TYPE_SEARCH_PERSON = "searchPerson";
     private static final String TYPE_SEARCH_METER = "searchMeter";
@@ -139,5 +141,13 @@ public class CcbService extends AbstractQueueService {
         BasePerson basePerson = new BasePerson();
         basePerson.setId(personId);
         return basePerson;
+    }
+
+    protected MessageProperties createMessageProperties(String type) {
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setHeader("type", type);
+        messageProperties.setHeader("m_guid", "08.06.2020"); // легаси заголовок, должен присутствовать, а что в нём - не важно
+        messageProperties.setContentEncoding(StandardCharsets.UTF_8.name());
+        return messageProperties;
     }
 }

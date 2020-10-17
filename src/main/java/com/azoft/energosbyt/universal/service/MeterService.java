@@ -4,7 +4,7 @@ import com.azoft.energosbyt.universal.dto.BaseMeter;
 import com.azoft.energosbyt.universal.dto.BasePerson;
 import com.azoft.energosbyt.universal.dto.Meter;
 import com.azoft.energosbyt.universal.dto.MeterResponse;
-import com.azoft.energosbyt.universal.service.queue.CcbService;
+import com.azoft.energosbyt.universal.service.queue.CcbQueueService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +14,17 @@ import java.util.*;
 @Slf4j
 public class MeterService {
 
-    private final CcbService ccbService;
+    private final CcbQueueService ccbQueueService;
 
-    public MeterService(CcbService ccbService) {
-        this.ccbService = ccbService;
+    public MeterService(CcbQueueService ccbQueueService) {
+        this.ccbQueueService = ccbQueueService;
     }
 
     public MeterResponse process(String system, String account) {
-        BasePerson personRabbitResponse = ccbService.searchPersonByAccount(account);
+        BasePerson personRabbitResponse = ccbQueueService.searchPersonByAccount(account);
         String personId = personRabbitResponse.getSrch_res().getRes().get(0).getId();
 
-        BaseMeter metersRabbitResponse = ccbService.searchMetersByPersonId(personId);
+        BaseMeter metersRabbitResponse = ccbQueueService.searchMetersByPersonId(personId);
         log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
 
         Map<String, String> activeMetersIdAndServiceType = getActiveMetersIdAndServiceType(metersRabbitResponse);
@@ -36,7 +36,7 @@ public class MeterService {
     private List<BaseMeter> getActiveMeters(Set<String> activeMeterIds) {
         List<BaseMeter> activeMeters = new ArrayList<>();
         activeMeterIds.forEach(id -> {
-            BaseMeter activeMeter = ccbService.getMeterById(id);
+            BaseMeter activeMeter = ccbQueueService.getMeterById(id);
             activeMeters.add(activeMeter);
         });
         return activeMeters;

@@ -1,11 +1,16 @@
 package com.azoft.energosbyt.universal.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -14,11 +19,17 @@ public class PayRequest {
 
   private static final String DATE_TIME_FORMAT = "dd.MM.yyyy HH:mm:ss";
 
+  @NotBlank
   private String system;
+  @NotBlank
   private String account;
+  @NotBlank
   private String txnId;
+  @NotNull
+  private BigDecimal sum;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT, timezone = "Europe/Moscow")
+  @NotBlank
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime datePay;
 
   @Data

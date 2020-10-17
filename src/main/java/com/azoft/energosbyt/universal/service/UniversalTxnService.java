@@ -1,11 +1,15 @@
 package com.azoft.energosbyt.universal.service;
 
+import com.azoft.energosbyt.universal.entity.UniversalTxnEntity;
 import com.azoft.energosbyt.universal.exception.ApiException;
 import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.azoft.energosbyt.universal.repository.UniversalTxnRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j
@@ -24,5 +28,15 @@ public class UniversalTxnService {
             log.error(message);
             throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
         }
+    }
+
+    public void create(String txnId, LocalDateTime txnDate, String system, String account, BigDecimal sum) {
+        UniversalTxnEntity newEntity = new UniversalTxnEntity();
+        newEntity.setTxnId(txnId);
+        newEntity.setTxnDate(txnDate);
+        newEntity.setSystem(system);
+        newEntity.setAccount(account);
+        newEntity.setSum(sum);
+        repository.save(newEntity);
     }
 }
