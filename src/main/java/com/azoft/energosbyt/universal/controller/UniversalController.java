@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping(UniversalController.API_URL)
 @Slf4j
@@ -42,7 +44,7 @@ public class UniversalController {
   private final MeterValueService meterValueService;
 
   @PostMapping(CHECK_URL)
-  public CheckResponse check(@RequestBody CheckRequest request) {
+  public CheckResponse check(@RequestBody @Valid CheckRequest request) {
     return checkService.process(request);
   }
 
