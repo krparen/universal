@@ -1,6 +1,7 @@
 package com.azoft.energosbyt.universal.service.queue;
 
 import com.azoft.energosbyt.universal.dto.BaseMeter;
+import com.azoft.energosbyt.universal.dto.BasePayment;
 import com.azoft.energosbyt.universal.dto.BasePerson;
 import com.azoft.energosbyt.universal.dto.BasePremise;
 import com.azoft.energosbyt.universal.exception.ApiException;
@@ -23,6 +24,7 @@ public class CcbQueueService {
     private static final String TYPE_GET_METER = "getMeter";
     private static final String TYPE_GET_PERSON_ACCOUNT = "getPersAccount";
     private static final String TYPE_GET_PREMISE = "getPremise";
+    private static final String TYPE_GET_BALANCE = "getHdBalance";
 
     @Value("${energosbyt.rabbit.request.check.queue-name}")
     private String ccbQueueName;
@@ -32,16 +34,16 @@ public class CcbQueueService {
     @Autowired
     private RabbitService rabbitService;
 
-    public BasePerson searchAccountsByPersonId(String personId) {
+    public BasePerson searchAccounts(String personId) {
         MessageProperties properties = createMessageProperties(TYPE_GET_PERSON_ACCOUNT);
-        BasePerson bodyObject = createSearchAccountByPersonIdRabbitRequest(personId);
+        BasePerson bodyObject = createSearchAccountRabbitRequest(personId);
         BasePerson response = rabbitService.sendAndReceive(ccbQueueName, properties, bodyObject);
         log.info("response for searchAccount: {}", response);
         return response;
     }
 
     public String getAddress(String personId, String account) {
-        BasePerson accountsSearchResult = searchAccountsByPersonId(personId);
+        BasePerson accountsSearchResult = searchAccounts(personId);
 
         String premiseId = accountsSearchResult.getAccounts().stream()
                 .filter(acc -> account.equals(acc.getAccount_number()))
@@ -76,7 +78,7 @@ public class CcbQueueService {
         return premise;
     }
 
-    public BasePerson searchPersonByAccount(String account) {
+    public BasePerson searchPerson(String account) {
 
         MessageProperties messageProperties = createMessageProperties(TYPE_SEARCH_PERSON);
         BasePerson bodyObject = createSearchPersonByAccountRabbitRequest(account);
@@ -97,16 +99,24 @@ public class CcbQueueService {
         return personRabbitResponse;
     }
 
-    public BaseMeter searchMetersByPersonId(String personId) {
+    public BaseMeter searchMeters(String personId) {
         MessageProperties messageProperties = createMessageProperties(TYPE_SEARCH_METER);
         BaseMeter bodyObject = createMetersRabbitRequest(personId);
         return rabbitService.sendAndReceive(ccbQueueName, messageProperties, bodyObject);
     }
 
-    public BaseMeter getMeterById(String meterId) {
+    public BaseMeter getMeter(String meterId) {
         MessageProperties metersMessageProperties = createMessageProperties(TYPE_GET_METER);
         BaseMeter bodyObject = createMeterValuesRabbitRequest(meterId);
         return rabbitService.sendAndReceive(ccbQueueName, metersMessageProperties, bodyObject);
+    }
+
+    public BasePayment getBalance(String account) {
+        BasePerson personSearch = searchPerson(account);
+        String personId = personSearch.getSrch_res().getRes().get(0).getId();
+        MessageProperties messageProperties = createMessageProperties(TYPE_GET_BALANCE);
+        BasePayment balanceSearchBody = createGetBalanceRabbitRequest(account, personId);
+        return rabbitService.sendAndReceive(ccbQueueName, messageProperties, balanceSearchBody);
     }
 
     private BaseMeter createMeterValuesRabbitRequest(String meterId) {
@@ -137,10 +147,18 @@ public class CcbQueueService {
         return rabbitRequest;
     }
 
-    private BasePerson createSearchAccountByPersonIdRabbitRequest(String personId) {
+    private BasePerson createSearchAccountRabbitRequest(String personId) {
         BasePerson basePerson = new BasePerson();
         basePerson.setId(personId);
         return basePerson;
+    }
+
+    private BasePayment createGetBalanceRabbitRequest(String account, String personId) {
+        BasePayment payment = new BasePayment();
+        payment.setAcct_id(account);
+        payment.getSrch().setAccount_id(account);
+        payment.getSrch().setClient_id(personId);
+        return payment;
     }
 
     protected MessageProperties createMessageProperties(String type) {

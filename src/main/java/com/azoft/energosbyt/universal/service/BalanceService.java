@@ -1,36 +1,26 @@
 package com.azoft.energosbyt.universal.service;
 
 import com.azoft.energosbyt.universal.dto.BalanceResponse;
-import com.azoft.energosbyt.universal.dto.OperationStatus;
+import com.azoft.energosbyt.universal.dto.BasePayment;
+import com.azoft.energosbyt.universal.dto.BasePerson;
+import com.azoft.energosbyt.universal.service.queue.CcbQueueService;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.math.RoundingMode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BalanceService {
 
+  @Autowired
+  private CcbQueueService ccbService;
+
   public BalanceResponse process(String system, String account) {
+
+    BasePayment basePayment = ccbService.getBalance(account);
+
     BalanceResponse response = new BalanceResponse();
-    response.setStatus(OperationStatus.ok);
-
-    BalanceResponse.Service svc1 = new BalanceResponse.Service();
-    svc1.setName("Интернет телевидение");
-    svc1.setCode("IPTV");
-    BigDecimal balance = BigDecimal.valueOf(11.22);
-    svc1.setBalance(balance);
-
-    BalanceResponse.Service svc2 = new BalanceResponse.Service();
-    svc2.setName("Уборка дома");
-    svc2.setCode("СLEANING_HOME");
-    BigDecimal balance2 = BigDecimal.valueOf(22.98);
-    svc2.setBalance(balance2);
-
-    List<BalanceResponse.Service> services = new ArrayList<>();
-    services.add(svc1);
-    services.add(svc2);
-
-    response.setServices(services);
+    response.setBalance(BigDecimal.valueOf(basePayment.getSm()).setScale(2, RoundingMode.HALF_UP));
     return response;
   }
 }

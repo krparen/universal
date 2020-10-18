@@ -21,10 +21,10 @@ public class MeterService {
     }
 
     public MeterResponse process(String system, String account) {
-        BasePerson personRabbitResponse = ccbQueueService.searchPersonByAccount(account);
+        BasePerson personRabbitResponse = ccbQueueService.searchPerson(account);
         String personId = personRabbitResponse.getSrch_res().getRes().get(0).getId();
 
-        BaseMeter metersRabbitResponse = ccbQueueService.searchMetersByPersonId(personId);
+        BaseMeter metersRabbitResponse = ccbQueueService.searchMeters(personId);
         log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
 
         Map<String, String> activeMetersIdAndServiceType = getActiveMetersIdAndServiceType(metersRabbitResponse);
@@ -36,7 +36,7 @@ public class MeterService {
     private List<BaseMeter> getActiveMeters(Set<String> activeMeterIds) {
         List<BaseMeter> activeMeters = new ArrayList<>();
         activeMeterIds.forEach(id -> {
-            BaseMeter activeMeter = ccbQueueService.getMeterById(id);
+            BaseMeter activeMeter = ccbQueueService.getMeter(id);
             activeMeters.add(activeMeter);
         });
         return activeMeters;
