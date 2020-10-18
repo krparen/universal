@@ -11,6 +11,7 @@
 	<groupId>com.azoft.energosbyt</groupId>
 	<artifactId>universal</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>universal</name>
 	<description>universal api for paying meters</description>
 
@@ -26,6 +27,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
@@ -69,6 +75,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>universal</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
