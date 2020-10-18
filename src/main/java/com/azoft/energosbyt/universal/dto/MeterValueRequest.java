@@ -20,7 +20,7 @@ public class MeterValueRequest {
   private String account;
   @NotBlank
   private String txnId;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT, timezone = "Europe/Moscow")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime dateMv;
 
   private List<MeterValue> meterValues = new ArrayList<>();
