@@ -21,7 +21,7 @@ public class CheckService {
 
     txnService.assertSameTxnNotExist(request.getTxnId(), request.getSystem());
 
-    BasePerson personSearch = ccbQueueService.searchPersonByAccount(request.getAccount());
+    BasePerson personSearch = ccbQueueService.searchPerson(request.getAccount());
     String personId = personSearch.getSrch_res().getRes().get(0).getId();
     String address = ccbQueueService.getAddress(personId, request.getAccount());
 
