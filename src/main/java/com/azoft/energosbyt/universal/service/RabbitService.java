@@ -1,10 +1,12 @@
 package com.azoft.energosbyt.universal.service;
 
+import com.azoft.energosbyt.universal.dto.rabbit.AbstractRabbitDto;
 import com.azoft.energosbyt.universal.exception.ApiException;
 import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import java.util.UUID;
 public class RabbitService {
 
     private static final String HEADER_REPLY_TO = "reply-to";
+    private static final String RESPONSE_ERROR_DATA_TEMPL =
+            "Rabbit response contains error data. errorCode: %s, errorMessage: %s";
 
     @Value("${energosbyt.rabbit.request.timeout-in-ms}")
     protected Long requestTimeout;
@@ -36,7 +40,7 @@ public class RabbitService {
         template.send(queueName, personRequestMessage);
     }
 
-    public <T> T sendAndReceive(String queueName, MessageProperties messageProperties, T messageBody) {
+    public <T extends AbstractRabbitDto> T sendAndReceive(String queueName, MessageProperties messageProperties, T messageBody) {
         String replyQueueName = messageProperties.getHeader(HEADER_REPLY_TO);
 
         try {
@@ -49,6 +53,13 @@ public class RabbitService {
 
             template.send(queueName, personRequestMessage);
             T response = (T) safelyReceiveResponse(replyQueueName, messageBody.getClass());
+
+            if (Strings.isNotBlank(response.getError_code()) || Strings.isNotBlank(response.getError_message())) {
+                String message = String.format(RESPONSE_ERROR_DATA_TEMPL, response.getError_code(), response.getError_message());
+                log.error(message);
+                throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
+            }
+
             return response;
         } finally {
             if (replyQueueName != null) {
@@ -93,13 +104,13 @@ public class RabbitService {
         } catch (AmqpException e) {
             String message = "Getting a rabbit response from queue " + replyQueueName + " failed";
             log.error(message, e);
-            throw new ApiException(message, e, ErrorCode.UNEXPECTED_ERROR);
+            throw new ApiException(message, e, ErrorCode.UNEXPECTED_ERROR, true);
         }
 
         if (responseMessage == null) {
             String message = "Rabbit response from queue " + replyQueueName + " failed timeout";
             log.error(message, replyQueueName);
-            throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR);
+            throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
         }
 
         String responseAsString = getMessageBodyAsString(responseMessage);

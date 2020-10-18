@@ -3,16 +3,19 @@ package com.azoft.energosbyt.universal.dto.rabbit;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
-public class BasePayment {
+@Getter
+@Setter
+@ToString
+public class BasePayment extends AbstractRabbitDto {
   private String acct_id;
   private float sm;
   private String id;
   private String system_id;
   private String action;
-  private String error_code;
-  private String error_message;
   private Srch srch = new Srch();
   private Srch_res res;
 

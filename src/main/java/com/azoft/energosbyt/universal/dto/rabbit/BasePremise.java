@@ -1,9 +1,14 @@
 package com.azoft.energosbyt.universal.dto.rabbit;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
-public class BasePremise {
+@Getter
+@Setter
+@ToString
+public class BasePremise extends AbstractRabbitDto {
     String premiseId;
     String id;
     String parentPremiseId;
@@ -55,8 +60,6 @@ public class BasePremise {
 
     String system_id;
     String action ;
-    String error_code;
-    String error_message;
 
 
     String charDa4A;
