@@ -1,8 +1,7 @@
 package com.azoft.energosbyt.universal.service;
 
 import com.azoft.energosbyt.universal.dto.BalanceResponse;
-import com.azoft.energosbyt.universal.dto.BasePayment;
-import com.azoft.energosbyt.universal.dto.BasePerson;
+import com.azoft.energosbyt.universal.dto.rabbit.BasePayment;
 import com.azoft.energosbyt.universal.service.queue.CcbQueueService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;

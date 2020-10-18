@@ -1,9 +1,9 @@
 package com.azoft.energosbyt.universal.service.queue;
 
-import com.azoft.energosbyt.universal.dto.BaseMeter;
-import com.azoft.energosbyt.universal.dto.BasePayment;
-import com.azoft.energosbyt.universal.dto.BasePerson;
-import com.azoft.energosbyt.universal.dto.BasePremise;
+import com.azoft.energosbyt.universal.dto.rabbit.BaseMeter;
+import com.azoft.energosbyt.universal.dto.rabbit.BasePayment;
+import com.azoft.energosbyt.universal.dto.rabbit.BasePerson;
+import com.azoft.energosbyt.universal.dto.rabbit.BasePremise;
 import com.azoft.energosbyt.universal.exception.ApiException;
 import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.azoft.energosbyt.universal.service.RabbitService;

@@ -1,4 +1,4 @@
-package com.azoft.energosbyt.universal.dto;
+package com.azoft.energosbyt.universal.dto.rabbit;
 
 import java.util.ArrayList;
 import java.util.Date;
