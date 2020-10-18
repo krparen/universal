@@ -40,7 +40,7 @@ public class PblQueueService {
     bmv.setT1(t1);
     bmv.setT2(t2);
     bmv.setT3(t3);
-    bmv.setMvDate(dateFromLocalDateTime(mvDate));
+    bmv.setMvDate(mvDate);
 
     return bmv;
   }
