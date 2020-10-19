@@ -87,7 +87,7 @@ public class CcbQueueService {
         if (personRabbitResponse.getSrch_res().getRes().isEmpty()) {
             String message = "No person found for account id = " + account;
             log.error(message);
-            throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
+            throw new ApiException(message, ErrorCode.ACCOUNT_NOT_FOUND, true);
         }
 
         if (personRabbitResponse.getSrch_res().getRes().size() > 1) {

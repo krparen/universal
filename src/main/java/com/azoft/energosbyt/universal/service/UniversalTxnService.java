@@ -26,7 +26,7 @@ public class UniversalTxnService {
         if (repository.findByTxnIdAndSystem(txnId, system) != null) {
             String message = String.format(SAME_TXN_RECORD_EXISTS, txnId, system);
             log.error(message);
-            throw new ApiException(message, ErrorCode.UNEXPECTED_ERROR, true);
+            throw new ApiException(message, ErrorCode.TXN_ID_NOT_UNIQUE, true);
         }
     }
 
