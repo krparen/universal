@@ -25,16 +25,17 @@ public class PblQueueService {
   @Autowired
   private RabbitService rabbitService;
 
-  public void sendMeterValues(String system, LocalDateTime mvDate, MeterValue meterValue) {
-    BaseMeterValue bodyObject = createSendMeterValuesRabbitRequest(meterValue.getMeterId(), meterValue.getMeterNumber(),
+  public void sendMeterValues(String system, String account, LocalDateTime mvDate, MeterValue meterValue) {
+    BaseMeterValue bodyObject = createSendMeterValuesRabbitRequest(account, meterValue.getMeterId(), meterValue.getMeterNumber(),
         meterValue.getT1(), meterValue.getT2(), meterValue.getT3(), mvDate);
     MessageProperties messageProperties = createMessageProperties(TYPE_SEND_METER_VALUES, system);
     rabbitService.send(PBL_QUEUE_NAME, messageProperties, bodyObject);
   }
 
-  private BaseMeterValue createSendMeterValuesRabbitRequest(String meterId, String meterNumber,
+  private BaseMeterValue createSendMeterValuesRabbitRequest(String account, String meterId, String meterNumber,
                                                             String t1, String t2, String t3, LocalDateTime mvDate) {
     BaseMeterValue bmv = new BaseMeterValue();
+    bmv.setAccountNumber(account);
     bmv.setMeterId(meterId);
     bmv.setMeterNumber(meterNumber);
     bmv.setT1(t1);

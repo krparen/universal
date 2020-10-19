@@ -11,7 +11,7 @@ import lombok.ToString;
 public class BasicResponse {
   private OperationStatus status = OperationStatus.ok;
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  private Integer errorCode;
+  private String errorCode;
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String errorMessage;
 }

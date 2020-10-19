@@ -30,41 +30,41 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class UniversalController {
 
-  public static final String API_URL = "/api";
-  public static final String CHECK_URL = "check";
-  public static final String BALANCE_URL = "balance";
-  public static final String PAY_URL = "pay";
-  public static final String METER_URL = "meter";
-  public static final String METER_VALUE_URL = "meter/value";
+    public static final String API_URL = "/api";
+    public static final String CHECK_URL = "check";
+    public static final String BALANCE_URL = "balance";
+    public static final String PAY_URL = "pay";
+    public static final String METER_URL = "meter";
+    public static final String METER_VALUE_URL = "meter/value";
 
-  private final CheckService checkService;
-  private final BalanceService balanceService;
-  private final PayService payService;
-  private final MeterService meterService;
-  private final MeterValueService meterValueService;
+    private final CheckService checkService;
+    private final BalanceService balanceService;
+    private final PayService payService;
+    private final MeterService meterService;
+    private final MeterValueService meterValueService;
 
-  @PostMapping(CHECK_URL)
-  public CheckResponse check(@RequestBody @Valid CheckRequest request) {
-    return checkService.process(request);
-  }
+    @PostMapping(CHECK_URL)
+    public CheckResponse check(@RequestBody @Valid CheckRequest request) {
+        return checkService.process(request);
+    }
 
-  @GetMapping(BALANCE_URL)
-  public BalanceResponse balance(@RequestParam String system, @RequestParam String account) {
-    return balanceService.process(system, account);
-  }
+    @GetMapping(BALANCE_URL)
+    public BalanceResponse balance(@RequestParam String system, @RequestParam String account) {
+        return balanceService.process(system, account);
+    }
 
-  @PostMapping(PAY_URL)
-  public PayResponse pay(@RequestBody PayRequest request) {
-    return payService.process(request);
-  }
+    @PostMapping(PAY_URL)
+    public PayResponse pay(@RequestBody @Valid PayRequest request) {
+        return payService.process(request);
+    }
 
-  @GetMapping(METER_URL)
-  public MeterResponse meter(@RequestParam String system, @RequestParam String account) {
-    return meterService.process(system, account);
-  }
+    @GetMapping(METER_URL)
+    public MeterResponse meter(@RequestParam String system, @RequestParam String account) {
+        return meterService.process(system, account);
+    }
 
-  @PostMapping(METER_VALUE_URL)
-  public MeterValueResponse meterValue(@RequestBody MeterValueRequest meterValueRequest) {
-    return meterValueService.process(meterValueRequest);
-  }
+    @PostMapping(METER_VALUE_URL)
+    public MeterValueResponse meterValue(@RequestBody @Valid MeterValueRequest meterValueRequest) {
+        return meterValueService.process(meterValueRequest);
+    }
 }
