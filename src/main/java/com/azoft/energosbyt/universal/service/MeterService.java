@@ -1,5 +1,6 @@
 package com.azoft.energosbyt.universal.service;
 
+import com.azoft.energosbyt.universal.dto.rabbit.BaseAccount;
 import com.azoft.energosbyt.universal.dto.rabbit.BaseMeter;
 import com.azoft.energosbyt.universal.dto.rabbit.BasePerson;
 import com.azoft.energosbyt.universal.dto.Meter;
@@ -27,10 +28,30 @@ public class MeterService {
         BaseMeter metersRabbitResponse = ccbQueueService.searchMeters(personId);
         log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
 
-        Map<String, String> activeMetersIdAndServiceType = getActiveMetersIdAndServiceType(metersRabbitResponse);
+        Map<String, String> activeMetersIdAndAccountId = getActiveMetersIdAndAccountId(metersRabbitResponse);
+        Map<String, String> meterIdToServiceType = getMeterIdAndServiceType(activeMetersIdAndAccountId);
 
-        List<BaseMeter> activeMeters = getActiveMeters(activeMetersIdAndServiceType.keySet());
-        return getMeterResponse(activeMeters, activeMetersIdAndServiceType);
+        List<BaseMeter> activeMeters = getActiveMeters(activeMetersIdAndAccountId.keySet());
+        return getMeterResponse(activeMeters, meterIdToServiceType);
+    }
+
+    private Map<String, String> getMeterIdAndServiceType(Map<String, String> activeMetersIdAndAccountId) {
+        Map<String, String> meterIdToServiceType = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : activeMetersIdAndAccountId.entrySet()) {
+             BaseAccount accountInfo = ccbQueueService.getAccount(entry.getValue()); // ищем информацию об аккаунте по его id
+
+            // далее вытаскиваем serviceType из инфо об аккаунте
+            String serviceType = Optional.ofNullable(accountInfo)
+                    .map(BaseAccount::getAccountData)
+                    .map(BaseAccount.AccountData::getServiceType)
+                    .map(s -> s.substring(s.indexOf("|")+1))
+                    .orElse(null);
+
+            meterIdToServiceType.put(entry.getKey(), serviceType); // и делаем новую map meterId -> serviceType
+        }
+
+        return meterIdToServiceType;
     }
 
     private List<BaseMeter> getActiveMeters(Set<String> activeMeterIds) {
@@ -42,7 +63,7 @@ public class MeterService {
         return activeMeters;
     }
 
-    private Map<String, String> getActiveMetersIdAndServiceType(BaseMeter metersSearchResult) {
+    private Map<String, String> getActiveMetersIdAndAccountId(BaseMeter metersSearchResult) {
         Map<String, String> activeMetersIdAndServiceType = new HashMap<>();
 
         List<BaseMeter.Srch_res.Srch_res_s> services = metersSearchResult.getSrch_res().getServ();
@@ -62,7 +83,7 @@ public class MeterService {
                     List<BaseMeter.Srch_res.Srch_res_s.Service_point.Sp_history> spHistories = servicePoint.getSPHs();
                     for (BaseMeter.Srch_res.Srch_res_s.Service_point.Sp_history spHistory : spHistories) {
                         if (spHistory.getRemove_date() == null) {
-                            activeMetersIdAndServiceType.put(spHistory.getMeter_id(), servicePoint.getServiceType());
+                            activeMetersIdAndServiceType.put(spHistory.getMeter_id(), service.getAccount_id());
                         }
                     }
                 }
@@ -72,7 +93,7 @@ public class MeterService {
         return activeMetersIdAndServiceType;
     }
 
-    private MeterResponse getMeterResponse(List<BaseMeter> activeMeters, Map<String, String> activeMetersIdAndServiceType) {
+    private MeterResponse getMeterResponse(List<BaseMeter> activeMeters, Map<String, String> meterIdToServiceType) {
 
         List<Meter> meters = new ArrayList<>();
 
@@ -80,7 +101,7 @@ public class MeterService {
             Meter meter = new Meter();
             meter.setMeterId(baseMeter.getId());
             meter.setMeterNumber(baseMeter.getBadgeNumber());
-            meter.setServiceName(baseMeter.getMeterType_desc());
+            meter.setServiceName(meterIdToServiceType.get(baseMeter.getId()));
 
             List<BaseMeter.Registr> registrs = baseMeter.getRegisters();
 
