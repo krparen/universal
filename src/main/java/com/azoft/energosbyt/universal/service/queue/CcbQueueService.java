@@ -1,9 +1,6 @@
 package com.azoft.energosbyt.universal.service.queue;
 
-import com.azoft.energosbyt.universal.dto.rabbit.BaseMeter;
-import com.azoft.energosbyt.universal.dto.rabbit.BasePayment;
-import com.azoft.energosbyt.universal.dto.rabbit.BasePerson;
-import com.azoft.energosbyt.universal.dto.rabbit.BasePremise;
+import com.azoft.energosbyt.universal.dto.rabbit.*;
 import com.azoft.energosbyt.universal.exception.ApiException;
 import com.azoft.energosbyt.universal.exception.ErrorCode;
 import com.azoft.energosbyt.universal.service.RabbitService;
@@ -25,6 +22,7 @@ public class CcbQueueService {
     private static final String TYPE_GET_PERSON_ACCOUNT = "getPersAccount";
     private static final String TYPE_GET_PREMISE = "getPremise";
     private static final String TYPE_GET_BALANCE = "getHdBalance";
+    private static final String TYPE_GET_ACCOUNT_INFO = "getAccInfo";
 
     @Value("${energosbyt.rabbit.request.check.queue-name}")
     private String ccbQueueName;
@@ -33,6 +31,20 @@ public class CcbQueueService {
 
     @Autowired
     private RabbitService rabbitService;
+
+    public BaseAccount getAccount(String accountId) {
+        MessageProperties properties = createMessageProperties(TYPE_GET_ACCOUNT_INFO);
+        BaseAccount bodyObject = createGetAccountInfoRabbitRequest(accountId);
+        BaseAccount response = rabbitService.sendAndReceive(ccbQueueName, properties, bodyObject);
+        return response;
+    }
+
+    private BaseAccount createGetAccountInfoRabbitRequest(String accountId) {
+        BaseAccount account = new BaseAccount();
+        account.setId(accountId);
+        account.setSystem_id("1010");
+        return account;
+    }
 
     public BasePerson searchAccounts(String personId) {
         MessageProperties properties = createMessageProperties(TYPE_GET_PERSON_ACCOUNT);
