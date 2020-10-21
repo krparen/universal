@@ -26,10 +26,10 @@ energosbyt:
     this-system-id: 1010
     qiwi-system-id: QIWI
   rabbit:
-    host: 10.5.3.70
+    host: 10.5.2.47
     port: 5672
     username: admin
-    password: Etooshagh5
+    password: dyr5BRFz
     request:
       check:
         queue-name: ccb
