@@ -1,7 +1,7 @@
 package com.azoft.energosbyt.universal.dto;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -10,5 +10,15 @@ public class Meter {
   private String meterNumber;
   private String serviceName;
   private String digits;
-  private Map<String, String> meterData = new HashMap<>();
+
+  @JsonProperty("T1")
+  private String t1;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonProperty("T2")
+  private String t2;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonProperty("T3")
+  private String t3;
 }

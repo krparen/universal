@@ -80,7 +80,7 @@ public class MeterService {
             Meter meter = new Meter();
             meter.setMeterId(baseMeter.getId());
             meter.setMeterNumber(baseMeter.getBadgeNumber());
-            meter.setServiceName(activeMetersIdAndServiceType.get(baseMeter.getId()));
+            meter.setServiceName(baseMeter.getMeterType_desc());
 
             List<BaseMeter.Registr> registrs = baseMeter.getRegisters();
 
@@ -88,9 +88,7 @@ public class MeterService {
                 meter.setDigits(registrs.get(0).getNumberOfDigitsLeft());
             }
 
-            Map<String, String> meterData = new HashMap<>();
-            meterData.put("T1", baseMeter.getNumber());
-            meter.setMeterData(meterData);
+            meter.setT1("1.0");
 
             meters.add(meter);
         });
