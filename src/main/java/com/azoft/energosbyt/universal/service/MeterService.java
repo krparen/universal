@@ -29,17 +29,17 @@ public class MeterService {
         log.info("User with id {} has meters {}", personId, metersRabbitResponse.getSrch_res().getServ());
 
         Map<String, String> activeMetersIdAndAccountId = getActiveMetersIdAndAccountId(metersRabbitResponse);
-        Map<String, String> meterIdToServiceType = getMeterIdAndServiceType(activeMetersIdAndAccountId);
+        Map<String, String> meterIdToServiceType = getMeterIdAndServiceType(system, activeMetersIdAndAccountId);
 
         List<BaseMeter> activeMeters = getActiveMeters(activeMetersIdAndAccountId.keySet());
         return getMeterResponse(activeMeters, meterIdToServiceType);
     }
 
-    private Map<String, String> getMeterIdAndServiceType(Map<String, String> activeMetersIdAndAccountId) {
+    private Map<String, String> getMeterIdAndServiceType(String system, Map<String, String> activeMetersIdAndAccountId) {
         Map<String, String> meterIdToServiceType = new HashMap<>();
 
         for (Map.Entry<String, String> entry : activeMetersIdAndAccountId.entrySet()) {
-             BaseAccount accountInfo = ccbQueueService.getAccount(entry.getValue()); // ищем информацию об аккаунте по его id
+             BaseAccount accountInfo = ccbQueueService.getAccount(entry.getValue(), system); // ищем информацию об аккаунте по его id
 
             // далее вытаскиваем serviceType из инфо об аккаунте
             String serviceType = Optional.ofNullable(accountInfo)

@@ -32,17 +32,17 @@ public class CcbQueueService {
     @Autowired
     private RabbitService rabbitService;
 
-    public BaseAccount getAccount(String accountId) {
+    public BaseAccount getAccount(String accountId, String system) {
         MessageProperties properties = createMessageProperties(TYPE_GET_ACCOUNT_INFO);
-        BaseAccount bodyObject = createGetAccountInfoRabbitRequest(accountId);
+        BaseAccount bodyObject = createGetAccountInfoRabbitRequest(accountId, system);
         BaseAccount response = rabbitService.sendAndReceive(ccbQueueName, properties, bodyObject);
         return response;
     }
 
-    private BaseAccount createGetAccountInfoRabbitRequest(String accountId) {
+    private BaseAccount createGetAccountInfoRabbitRequest(String accountId, String system) {
         BaseAccount account = new BaseAccount();
         account.setId(accountId);
-        account.setSystem_id("1010");
+        account.setSystem_id(system);
         return account;
     }
 
