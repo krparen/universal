@@ -1,5 +1,6 @@
 package com.azoft.energosbyt.universal.dto;
 
+import com.azoft.energosbyt.universal.validation.Money;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.math.BigDecimal;
@@ -26,12 +27,11 @@ public class PayRequest {
   @NotBlank
   private String account;
   @NotBlank
-  @JsonProperty("trx_id")
-  private String trxId;
-  @NotNull
+  private String trx_id;
+  @Money
   private BigDecimal sum;
 
-  @NotBlank
+  @NotNull
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime datePay;
 

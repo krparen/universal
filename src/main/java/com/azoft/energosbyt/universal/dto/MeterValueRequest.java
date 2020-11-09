@@ -21,10 +21,12 @@ public class MeterValueRequest {
   @NotBlank
   private String account;
   @NotBlank
-  @JsonProperty("trx_id")
-  private String trxId;
+  private String trx_id;
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime dateMv;
 
-  private List<MeterValue> meterValues = new ArrayList<>();
+  /**
+   * meter values
+   */
+  private List<MeterValue> mvs = new ArrayList<>();
 }

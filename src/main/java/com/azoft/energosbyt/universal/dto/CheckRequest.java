@@ -16,8 +16,7 @@ public class CheckRequest {
   @NotBlank
   private String account;
   @NotBlank
-  @JsonProperty("trx_id")
-  private String trxId;
+  private String trx_id;
   private BigDecimal sum;
   private List<Service> services;
 

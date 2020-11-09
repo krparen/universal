@@ -9,6 +9,5 @@ import lombok.ToString;
 @Setter
 @ToString
 public class PayResponse extends BasicResponse {
-  @JsonProperty("trx_id")
-  private String trxId;
+  private String trx_id;
 }

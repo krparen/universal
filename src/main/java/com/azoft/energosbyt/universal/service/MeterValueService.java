@@ -15,12 +15,12 @@ public class MeterValueService {
 
   public MeterValueResponse process(MeterValueRequest request) {
 
-    request.getMeterValues().forEach(meterValue ->
+    request.getMvs().forEach(meterValue ->
         pblService.sendMeterValues(request.getSystem(), request.getAccount(), request.getDateMv(), meterValue));
 
     MeterValueResponse response = new MeterValueResponse();
     response.setStatus(OperationStatus.ok);
-    response.setTrxId(request.getTrxId());
+    response.setTrx_id(request.getTrx_id());
     return response;
   }
 }

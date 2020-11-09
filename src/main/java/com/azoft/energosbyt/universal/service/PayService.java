@@ -20,17 +20,17 @@ public class PayService {
   @Transactional
   public PayResponse process(PayRequest request) {
 
-    txnService.assertSameTxnNotExist(request.getTrxId(), request.getSystem());
+    txnService.assertSameTxnNotExist(request.getTrx_id(), request.getSystem());
 
-    txnService.create(request.getTrxId(), request.getDatePay(), request.getSystem(),
+    txnService.create(request.getTrx_id(), request.getDatePay(), request.getSystem(),
             request.getAccount(), request.getSum());
 
     payQueueService.process(request.getSystem(), request.getAccount(), request.getSum(),
-            request.getTrxId(), request.getDatePay());
+            request.getTrx_id(), request.getDatePay());
 
     PayResponse response = new PayResponse();
     response.setStatus(OperationStatus.ok);
-    response.setTrxId(request.getTrxId());
+    response.setTrx_id(request.getTrx_id());
     return response;
   }
 }
