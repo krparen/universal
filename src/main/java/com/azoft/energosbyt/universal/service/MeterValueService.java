@@ -20,7 +20,7 @@ public class MeterValueService {
 
     MeterValueResponse response = new MeterValueResponse();
     response.setStatus(OperationStatus.ok);
-    response.setTxnId(request.getTxnId());
+    response.setTrxId(request.getTrxId());
     return response;
   }
 }

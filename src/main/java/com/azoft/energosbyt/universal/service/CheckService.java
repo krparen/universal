@@ -19,7 +19,7 @@ public class CheckService {
 
   public CheckResponse process(CheckRequest request) {
 
-    txnService.assertSameTxnNotExist(request.getTxnId(), request.getSystem());
+    txnService.assertSameTxnNotExist(request.getTrxId(), request.getSystem());
 
     BasePerson personSearch = ccbQueueService.searchPerson(request.getAccount());
     String personId = personSearch.getSrch_res().getRes().get(0).getId();

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -19,7 +21,8 @@ public class MeterValueRequest {
   @NotBlank
   private String account;
   @NotBlank
-  private String txnId;
+  @JsonProperty("trx_id")
+  private String trxId;
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime dateMv;
 

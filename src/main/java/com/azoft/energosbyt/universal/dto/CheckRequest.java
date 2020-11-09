@@ -2,6 +2,8 @@ package com.azoft.energosbyt.universal.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -14,7 +16,8 @@ public class CheckRequest {
   @NotBlank
   private String account;
   @NotBlank
-  private String txnId;
+  @JsonProperty("trx_id")
+  private String trxId;
   private BigDecimal sum;
   private List<Service> services;
 

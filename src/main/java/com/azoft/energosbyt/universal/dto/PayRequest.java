@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +26,8 @@ public class PayRequest {
   @NotBlank
   private String account;
   @NotBlank
-  private String txnId;
+  @JsonProperty("trx_id")
+  private String trxId;
   @NotNull
   private BigDecimal sum;
 
